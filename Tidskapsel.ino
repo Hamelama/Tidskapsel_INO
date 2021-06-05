@@ -9,6 +9,10 @@ int backgroundPin = 4;
 int tipPin = 2;
 int futurePin = 3;
 int busyPin = 6;
+int first = 1;
+
+int availableInts[] = {first,first + 1, first + 2, first + 3,first + 4};
+int takenInts = 0;
 
 unsigned long timeBefore = 0;
 
@@ -29,6 +33,7 @@ void setup() {
 }
 
 void loop() {
+
   bool isBttnBackgroundPressed = false;
   bool isBttnTipPressed = false;
   //Chamfer
@@ -40,31 +45,32 @@ void loop() {
 
   if(isNotBusy)
   {
-    if((timeNow - timeBefore) > 1000)
+    
+    if((timeNow - timeBefore) > 100)
     {
       isBttnBackgroundPressed = digitalRead(backgroundPin);
       isBttnTipPressed = digitalRead(tipPin);
       isBttnFuturesPressed = digitalRead(futurePin);
       /*
-       På sd-kortet: 1:a är bakgrund
-       2:a är framtidshopp
-       3-10 är tips/historier 
+       På sd-kortet: 1-5 är nutid
+       6:e är bakgrund
+       7 är framtid
        
       */
       if(isBttnBackgroundPressed){
-          myDFPlayer.playMp3Folder(1);
+          myDFPlayer.playMp3Folder(first + 5);
           timeBefore = timeNow;
-          Serial.println("bak");
+       
     }
       else if(isBttnTipPressed){
-          myDFPlayer.playMp3Folder(2);
-          timeBefore = timeNow;
-           Serial.println("nu");
+        int tipNum = randomWithoutRepetition();
+        myDFPlayer.playMp3Folder(tipNum);
+        timeBefore = timeNow;
+      
       }
       else if(isBttnFuturesPressed){
-          myDFPlayer.playMp3Folder(3);
+          myDFPlayer.playMp3Folder(first + 6);
           timeBefore = timeNow;
-          Serial.println("bak");
       }
     }
   
@@ -73,12 +79,27 @@ void loop() {
     if(timeNow < timeBefore){
     timeBefore = 0;
   }
+}
+//Likt en påse som man tar ut godis ur men inte lägger tillbaka
+int randomWithoutRepetition(){
+  if (takenInts == 5) {
+    availableInts[0] = first;
+    availableInts[1] = first + 1;
+    availableInts[2] = first + 2;
+    availableInts[3] = first + 3;
+    availableInts[4] = first + 4;
+    takenInts = 0;
+  }
+  bool found = false;
+  int i = 0;
+  while (!found){
+    i = random(first,first + 5);
+    if(availableInts[i-1] == i){
+      availableInts[i-1] = -1;
+      takenInts++;
+      found = true;
+    }
+  }
+  return i; 
   
-//  //Passiv
-//  else{
-//    if((timeNow - timeBefore) > (10*1000)){
-//      Serial.println("Here comes the king");
-//      timeBefore = timeNow;
-//    }
-//  }
 }

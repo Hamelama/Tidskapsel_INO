@@ -6,17 +6,17 @@ SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
 DFRobotDFPlayerMini myDFPlayer;
 
 int backgroundPin = 4;
-int tipPin = 2;
-int futurePin = 3;
+int tipPin = 3;
+int futurePin = 2;
 int busyPin = 6;
-int first = 1;
 
-int availableInts[] = {first,first + 1, first + 2, first + 3,first + 4};
+int availableInts[] = {1,2, 3, 4, 5, 6, 7, 8, 9, 10};
 int takenInts = 0;
 
 unsigned long timeBefore = 0;
 
 void setup() {
+  randomSeed(analogRead(A5));
   pinMode(backgroundPin, INPUT);
   pinMode(tipPin, INPUT);
   pinMode(futurePin, INPUT);
@@ -28,7 +28,7 @@ void setup() {
       delay(0); // Code to compatible with ESP8266 watch dog.
     }
   }
-  myDFPlayer.playMp3Folder(1);
+ 
   myDFPlayer.volume(20);  //Set volume value. From 0 to 30  
 }
 
@@ -58,42 +58,56 @@ void loop() {
        
       */
       if(isBttnBackgroundPressed){
-          myDFPlayer.playMp3Folder(first + 5);
+     
+          myDFPlayer.playFolder(15, 1);
           timeBefore = timeNow;
+          Serial.println("Background");
        
     }
       else if(isBttnTipPressed){
         int tipNum = randomWithoutRepetition();
         myDFPlayer.playMp3Folder(tipNum);
         timeBefore = timeNow;
+        Serial.println("Now");
       
       }
       else if(isBttnFuturesPressed){
-          myDFPlayer.playMp3Folder(first + 6);
+        
+          myDFPlayer.playFolder(15, 2);
           timeBefore = timeNow;
+          Serial.println("Future");
       }
     }
   
   }
 
     if(timeNow < timeBefore){
+      Serial.println("Reset time");
     timeBefore = 0;
   }
 }
 //Likt en påse som man tar ut godis ur men inte lägger tillbaka
 int randomWithoutRepetition(){
-  if (takenInts == 5) {
-    availableInts[0] = first;
-    availableInts[1] = first + 1;
-    availableInts[2] = first + 2;
-    availableInts[3] = first + 3;
-    availableInts[4] = first + 4;
+  //Refill
+  if (takenInts == 10) {
+    availableInts[0] = 1;
+    availableInts[1] = 2;
+    availableInts[2] = 3;
+    availableInts[3] = 4;
+    availableInts[4] = 5;
+    availableInts[5] = 6;
+    availableInts[6] = 7;
+    availableInts[7] = 8;
+    availableInts[8] = 9;
+    availableInts[9] = 10;
     takenInts = 0;
+    Serial.println("REFILL");
+   
   }
   bool found = false;
   int i = 0;
   while (!found){
-    i = random(first,first + 5);
+    i = random(1, 11);
     if(availableInts[i-1] == i){
       availableInts[i-1] = -1;
       takenInts++;
